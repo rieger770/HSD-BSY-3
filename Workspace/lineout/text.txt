@@ -1,0 +1,8 @@
+erste zeile
+zweite zeile
+hallo 3.
+das ist 4
+5.
+bsy ist super toll
+das ist ein c programm
+das ist zeile 8 und somit die letzte des dokuments.
