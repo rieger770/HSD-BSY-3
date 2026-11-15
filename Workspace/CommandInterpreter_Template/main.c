@@ -7,7 +7,7 @@
 
 int main(int const argc, char const* const* argv){
 
-   char ch = '\0';
+   int ch = 0;  //int, so EOF can be distinguished from a valid char
 
    //initialize the command interpreter
    Init(GetCmdHndTable(), putchar);
@@ -15,7 +15,7 @@ int main(int const argc, char const* const* argv){
    //read characters from input
    do {
       ch = getchar();			// wait for key
-   } while(Process(ch)!= cESC);	//ESC typed?
+   } while(ch != EOF && Process((char)ch) != cESC);	//end of input or ESC typed?
 
 	return EXIT_SUCCESS;
 }

@@ -6,7 +6,7 @@
 static TCmdHndTable const *gcmds = 0; // table of available commands
 static int (*gpPutChar)(int);         // function pointer for a put-char-function
 static TParameters gParams;           // struct that holds all entered params to last cmd
-static char gInput[MAX_INPUTLEN];     // modul internal puffer
+static char gInput[MAX_INPUTLEN];     // module internal input buffer
 static int gInputLen = 0;             // length of input string
 
 // welcome message
@@ -42,9 +42,7 @@ int Process(char const ch)
 
    if(ch == '\n' || ch == '\r')
    {
-      checkInput();
-      // Print own input
-      Print(gInput);
+      checkInput(); // evaluate the completed input line
       // clear buffer for next command input
       gInputLen = 0;
       gInput[0] = '\0';
@@ -52,8 +50,12 @@ int Process(char const ch)
    }
    else if (gInputLen < MAX_INPUTLEN - 1)
    {
+      // copy char into input buffer
       gInput[gInputLen++] = ch;
       gInput[gInputLen] = '\0';
+      // echo char via the put-char-function
+      char const echo[2] = {ch, '\0'};
+      Print(echo);
    }
 
    return ch;
@@ -144,7 +146,15 @@ static void evaluateCmd()
    {
       if(strcmp(gcmds[k].command, gParams.params[0]) == 0)
       {
-         gcmds[k].func();
+         // execute command and show its return value (0 = error)
+         if(gcmds[k].func() != 0)
+         {
+            Print("\nOK");
+         }
+         else
+         {
+            Print("\nERROR");
+         }
          return;
       }
    }

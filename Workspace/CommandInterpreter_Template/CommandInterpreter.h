@@ -23,7 +23,8 @@ void Init(TCmdHndTable const cmds[], int (*PutCh)(int));
 //1st parameter is command itself
 TParameters GetParams();
 
-//function that handles every single incoming char
+//function that handles every single incoming char (echo, buffering, evaluation)
+//returns cESC if the escape key was received, otherwise the given char
 int Process(char const ch);
 
 //function which writes a string to the given put-char-function
