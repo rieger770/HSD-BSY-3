@@ -17,10 +17,7 @@
 //makros
 
 //error messages
-static char const* const cUsage       = "usage: ReadDirectory [path]\n";
 static char const* const cErrOpenDir  = "error in opendir";
-static char const* const cErrReadDir  = "error in readdir!";
-static char const* const cErrCloseDir = "error in closedir!";
 static char const* const cErrChangeDir = "error in chdir!";
 static char const* const cErrCWD = "invalid current working directory!";
 static char const* const cErrMkDir = "error in mkdir!";
