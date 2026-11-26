@@ -5,6 +5,7 @@
 .ssh
 .vscode
 Latex
+Latex_*
 build
 literature
 

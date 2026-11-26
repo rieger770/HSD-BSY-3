@@ -2,18 +2,29 @@
 #include <string.h>
 #include <limits.h>
 #include <unistd.h>
+#include <sys/stat.h>
 #include "directory.h"
 
 #define TEST_DIR "dir_test"
 
+static void PrintMode(char const *path)
+{
+    struct stat st;
+    if (stat(path, &st) != 0)
+    {
+        perror("error in stat!");
+        return;
+    }
+    printf("  %-14s %04o\n", path, (unsigned)(st.st_mode & 07777));
+}
+
 int main(void)
 {
-    // create test dir and change into it
+    umask(0022);
+
     AddDir(TEST_DIR);
     ChangeToDir(TEST_DIR);
 
-    // safety check: only continue if we are really inside the test dir,
-    // otherwise RemoveAll would delete the wrong directory
     char cwd[PATH_MAX];
     char const *last = getcwd(cwd, sizeof cwd) ? strrchr(cwd, '/') : NULL;
     if (last == NULL || strcmp(last + 1, TEST_DIR) != 0)
@@ -22,8 +33,7 @@ int main(void)
         return 1;
     }
 
-    // AddDir / AddFile with default rights
-    printf("--- AddDir / AddFile ---\n");
+    printf("--- AddDir / AddFile (default rights) ---\n");
     AddDir("a");
     AddDir("a/b");
     AddFile("f1.txt");
@@ -35,11 +45,49 @@ int main(void)
     AddDir("a/b/private");
     AddFile("a/b/f3.txt");
 
-    // error case: dir already exists
+    // SetAccessRights: new entries get 0644
+    printf("--- SetAccessRights(0644) ---\n");
+    SetAccessRights(0644);
+    AddFile("a/b/f4.txt");
+
+    // check the rights of the created entries
+    printf("--- access rights ---\n");
+    PrintMode("a");
+    PrintMode("a/b");
+    PrintMode("f1.txt");
+    PrintMode("a/f2.txt");
+    PrintMode("a/b/private");
+    PrintMode("a/b/f3.txt");
+    PrintMode("a/b/f4.txt");
+
+    // error cases -> messages on stderr
     printf("--- error case: AddDir(\"a\") again ---\n");
+    fflush(stdout);
     AddDir("a");
 
-    printf("--- PrintDir ---\n");
+    printf("--- error case: AddFile(\"f1.txt\") again ---\n");
+    fflush(stdout);
+    AddFile("f1.txt");
+
+    printf("--- error case: AddDir in missing dir ---\n");
+    fflush(stdout);
+    AddDir("missing/x");
+
+    printf("--- error case: ChangeToDir(\"missing\") ---\n");
+    fflush(stdout);
+    ChangeToDir("missing");
+
+    printf("--- error case: ChangeToDir(\"f1.txt\") (no dir) ---\n");
+    fflush(stdout);
+    ChangeToDir("f1.txt");
+
+    // ChangeToDir into sub dir and back
+    printf("--- ChangeToDir(\"a/b\") + PrintDir ---\n");
+    ChangeToDir("a/b");
+    PrintDir();
+    ChangeToDir("../..");
+
+    printf("--- PrintDir (whole test dir) ---\n");
     PrintDir();
 
     printf("--- RemoveAll ---\n");
