@@ -24,6 +24,11 @@ static int Select(struct dirent const* dir)
    assert(dir != 0);
 
    //to do #2
+   if((strcmp(dir->d_name, ".") == EQUAL) || (strcmp(dir->d_name, "..") == EQUAL))
+   {
+      return SEL_NOK;
+   }
+   return SEL_OK;
 }
 
 
@@ -32,7 +37,7 @@ static int SelectFiles(struct dirent const* dir)
 {
    assert(dir != 0);
 
-  //to do #3
+   return(dir->d_type == DT_REG) ? SEL_OK : SEL_NOK;
 }
 
 
@@ -47,6 +52,10 @@ static int SortByLen(struct dirent const** left,
    assert(left != 0 && right != 0 && *left != 0 && *right != 0);
 
    //to do #4
+   int const lenLeft = (int)strlen((*left)->d_name);
+   int const lenRight = (int)strlen((*right)->d_name);
+
+   return lenRight - lenLeft;
 }
 
 
@@ -71,7 +80,36 @@ int main (int argc, char **argv)
    struct dirent **namelist = 0;
 
    //to do #1
+   //Variante 1
+   //int numOfEntries = scandir(dirName, &namelist, nullptr, alphasort);
 
+   //Variante 2 -> mit function pointer auf Funktion "Select"
+   // int numOfEntries = scandir(dirName, &namelist, Select, alphasort);
+
+   // Variante 3 -> mit function pointer auf Funktion "Select" und "SortByLen"
+   //int numOfEntries = scandir(dirName, &namelist, Select, SortByLen);
+
+   // Variante 4 -> mit SelectFiles
+   int numOfEntries = scandir(dirName, &namelist, SelectFiles, SortByLen);
+   if(errno)
+   {
+      perror(cErrScanDir);
+      return EXIT_FAILURE;
+   }
+
+   printf("Anzahl der Eintraege in %s: %d\n", dirName, numOfEntries);
+
+   //Ausgabe der Eintraege
+   if(numOfEntries > 0)
+   {
+      puts("Die Eintraege:");
+      for(int i = 0; i<numOfEntries; ++i)
+      {
+         printf(" %s -> %ld\n", namelist[i]->d_name, namelist[i]->d_ino);
+         free(namelist[i]); //Eintrag freigeben
+      }
+      free(namelist);
+   }
 
    return EXIT_SUCCESS;
 }

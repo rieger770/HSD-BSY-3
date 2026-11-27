@@ -1,0 +1,5 @@
+---
+triple:          'arm64-apple-darwin'
+binary-path:     '/Users/juls/native/HSD-BSY-3/Workspace/ScanDir/scan_dir'
+relocations:     []
+...
